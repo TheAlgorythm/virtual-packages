@@ -1,0 +1,19 @@
+---
+- hosts: all
+
+  tasks:
+    - name: Install Paru
+      shell: >
+        paru -V > /dev/null
+        && echo -n HOLDED
+        || (cd /tmp && git clone https://aur.archlinux.org/paru-bin.git && cd paru-bin && makepkg -si && cd .. && rm -rf paru-bin)
+      register: paru_hold
+      changed_when: paru_hold.stdout != 'HOLDED'
+
+    - name: Install Ansible AUR
+      shell: >
+        ls /usr/share/ansible/plugins/modules/aur.py | grep -q aur
+        && echo -n HOLDED
+        || yes | paru -S --skipreview -a ansible-aur-git
+      register: ansible_aur_hold
+      changed_when: ansible_aur_hold.stdout != 'HOLDED'
