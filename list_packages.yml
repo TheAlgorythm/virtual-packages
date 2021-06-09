@@ -1,0 +1,38 @@
+---
+- hosts: all
+
+  vars_files:
+    - default.config.yml
+  pre_tasks:
+    - name: Include playbook configuration.
+      include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ playbook_dir }}/config.yml"
+        - "{{ playbook_dir }}/applications.yml"
+      tags: ['always']
+
+  tasks:
+    - import_tasks: tasks/get_packages.yml
+
+    - name: Format packages
+      set_fact:
+        pacman_formatted: "{{ pacman_packages | map(attribute='pacman') }}"
+        aur_formatted: "{{ aur_packages | map(attribute='aur') }}"
+        cargo_formatted: "{{ cargo_packages | map(attribute='cargo') }}"
+
+    - name: Pacman packages to install
+      debug:
+        var: pacman_formatted
+
+    - name: AUR packages to install
+      debug:
+        var: aur_formatted
+
+    - name: Cargo packages to install
+      debug:
+        var: cargo_formatted
+
+    - name: Vagrant libvirt plugin to install
+      debug:
+        msg: The Vagrant libvirt plugin will be installed.
+      when: "'Vagrant' is in_attr(packages, 'name') and ansible_facts['system'] == 'Linux'"

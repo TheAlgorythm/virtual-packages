@@ -12,18 +12,7 @@
       tags: ['always']
 
   tasks:
-    - name: Filter packages
-      set_fact:
-        cacheable: yes
-        packages: "{{ (packages | selectattr('tags', 'conjunct', allowed_tags) + (packages | selectattr('name', 'in', allowed_apps)))
-          | unique | selectattr('tags', 'disjunct', blocked_tags) | selectattr('name', 'not_in', blocked_apps) | list }}"
-
-    - name: Divide packages
-      set_fact:
-        cacheable: yes
-        pacman_packages: "{{ packages | select('package_divide', 'pacman', package_managers) | list }}"
-        aur_packages: "{{ packages | select('package_divide', 'aur', package_managers) | list }}"
-        cargo_packages: "{{ packages | select('package_divide', 'cargo', package_managers) | list }}"
+    - import_tasks: tasks/get_packages.yml
   
     - name: Install Pacman packages
       pacman:
@@ -38,15 +27,6 @@
         name: "{{ item.aur }}"
       loop: "{{ aur_packages }}"
 
-    - name: Install Vagrant libvirt plugin
-      shell: >
-        vagrant plugin list | grep -q vagrant-libvirt
-        && echo -n HOLDED
-        || vagrant plugin install vagrant-libvirt
-      register: vagrant_libvirt_hold
-      changed_when: vagrant_libvirt_hold.stdout != 'HOLDED'
-      when: "'Vagrant' is in_attr(packages, 'name') and ansible_facts['system'] == 'Linux'"
-
     - name: Install Cargo packages
       shell: >
         cargo install --list | grep -q {{ item.cargo }}
@@ -55,3 +35,12 @@
       register: cargo_install_hold
       changed_when: cargo_install_hold.stdout != 'HOLDED'
       loop: "{{ cargo_packages }}"
+
+    - name: Install Vagrant libvirt plugin
+      shell: >
+        vagrant plugin list | grep -q vagrant-libvirt
+        && echo -n HOLDED
+        || vagrant plugin install vagrant-libvirt
+      register: vagrant_libvirt_hold
+      changed_when: vagrant_libvirt_hold.stdout != 'HOLDED'
+      when: "'Vagrant' is in_attr(packages, 'name') and ansible_facts['system'] == 'Linux'"

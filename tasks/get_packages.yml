@@ -1,0 +1,14 @@
+---
+- name: Filter packages
+  set_fact:
+    cacheable: yes
+    packages: "{{ (packages | selectattr('tags', 'conjunct', allowed_tags) + (packages | selectattr('name', 'in', allowed_apps)))
+      | unique | selectattr('tags', 'disjunct', blocked_tags) | selectattr('name', 'not_in', blocked_apps)
+      | select('conjunct_attr', package_managers) | list }}"
+
+- name: Divide packages
+  set_fact:
+    cacheable: yes
+    pacman_packages: "{{ packages | select('package_divide', 'pacman', package_managers) | list }}"
+    aur_packages: "{{ packages | select('package_divide', 'aur', package_managers) | list }}"
+    cargo_packages: "{{ packages | select('package_divide', 'cargo', package_managers) | list }}"
