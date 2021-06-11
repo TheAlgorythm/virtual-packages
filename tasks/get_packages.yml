@@ -9,6 +9,7 @@
 - name: Divide packages
   set_fact:
     cacheable: yes
-    pacman_packages: "{{ packages | select('package_divide', 'pacman', package_managers) | list }}"
-    aur_packages: "{{ packages | select('package_divide', 'aur', package_managers) | list }}"
-    cargo_packages: "{{ packages | select('package_divide', 'cargo', package_managers) | list }}"
+    pacman_packages: "{{ packages | select('package_divide', 'pacman', package_managers) | map(attribute='pacman') | list }}"
+    aur_packages: "{{ packages | select('package_divide', 'aur', package_managers) | map(attribute='aur') | list }}"
+    homebrew_packages: "{{ packages | select('package_divide', 'homebrew', package_managers) | map(attribute='homebrew') | list }}"
+    cargo_packages: "{{ packages | select('package_divide', 'cargo', package_managers) | map(attribute='cargo') | list }}"

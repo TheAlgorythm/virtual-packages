@@ -16,25 +16,32 @@
   
     - name: Install Pacman packages
       pacman:
-        name: "{{ item.pacman }}"
-        state: latest
-      loop: "{{ pacman_packages }}"
+        name: "{{ pacman_packages }}"
+        state: present
+      when: "'pacman' in package_managers"
 
     - name: Install AUR packages
       aur:
         use: paru
         aur_only: yes
-        name: "{{ item.aur }}"
-      loop: "{{ aur_packages }}"
+        name: "{{ aur_packages }}"
+      when: "'aur' in package_managers"
+
+    - name: Install Homebrew packages
+      homebrew:
+        name: "{{ homebrew_packages }}"
+        state: present
+      when: "'homebrew' in package_managers"
 
     - name: Install Cargo packages
       shell: >
-        cargo install --list | grep -q {{ item.cargo }}
+        cargo install --list | grep -q {{ item }}
         && echo -n HOLDED
-        || cargo install {{ item.cargo }}
+        || cargo install {{ item }}
       register: cargo_install_hold
       changed_when: cargo_install_hold.stdout != 'HOLDED'
       loop: "{{ cargo_packages }}"
+      when: "'cargo' in package_managers"
 
     - name: Install Vagrant libvirt plugin
       shell: >

@@ -14,23 +14,25 @@
   tasks:
     - import_tasks: tasks/get_packages.yml
 
-    - name: Format packages
-      set_fact:
-        pacman_formatted: "{{ pacman_packages | map(attribute='pacman') }}"
-        aur_formatted: "{{ aur_packages | map(attribute='aur') }}"
-        cargo_formatted: "{{ cargo_packages | map(attribute='cargo') }}"
-
     - name: Pacman packages to install
       debug:
-        var: pacman_formatted
+        var: pacman_packages
+      when: "'pacman' in package_managers"
 
     - name: AUR packages to install
       debug:
-        var: aur_formatted
+        var: aur_packages
+      when: "'aur' in package_managers"
+
+    - name: Homebrew packages to install
+      debug:
+        var: homebrew_packages
+      when: "'homebrew' in package_managers"
 
     - name: Cargo packages to install
       debug:
-        var: cargo_formatted
+        var: cargo_packages
+      when: "'cargo' in package_managers"
 
     - name: Vagrant libvirt plugin to install
       debug:
