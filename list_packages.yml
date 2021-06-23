@@ -12,7 +12,16 @@
       tags: ['always']
 
   tasks:
+    - name: Get all tags
+      set_fact:
+        cacheable: yes
+        neutral_tags: "{{ packages | sum(attribute='tags', start=[]) | unique | reject('in', (allowed_tags + blocked_tags)) }}"
+
     - import_tasks: tasks/get_packages.yml
+
+    - name: Show neutral tags
+      debug:
+        var: neutral_tags
 
     - name: Pacman packages to install
       debug:
