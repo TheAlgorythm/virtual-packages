@@ -20,23 +20,41 @@
         state: present
       when: "'pacman' in package_managers"
 
+    - name: Install Paru for AUR
+      shell: >
+        paru -V > /dev/null
+        && printf HOLDED
+        || (cd /tmp && git clone https://aur.archlinux.org/paru-bin.git && cd paru-bin && makepkg -si && cd .. && rm -rf paru-bin)
+      register: paru_hold
+      changed_when: paru_hold.stdout != 'HOLDED'
+      when: "'aur' in package_managers"
+
     - name: Install AUR packages
-      aur:
-        use: paru
-        aur_only: yes
-        name: "{{ aur_packages }}"
+      shell: >
+        pacman -Qqem | grep -q {{ item }}
+        && printf HOLDED
+        || yes | paru -S --skipreview -a {{ item }}
+      register: aur_hold
+      changed_when: aur_hold.stdout != 'HOLDED'
+      loop: "{{ aur_packages }}"
       when: "'aur' in package_managers"
 
     - name: Install Homebrew packages
       homebrew:
-        name: "{{ homebrew_packages }}"
+        name: "{{ brew_packages }}"
         state: present
-      when: "'homebrew' in package_managers"
+      when: "'brew' in package_managers"
+
+    - name: Install Homebrew cask packages
+      homebrew_cask:
+        name: "{{ brew_cask_packages }}"
+        state: present
+      when: "'brew-cask' in package_managers"
 
     - name: Install Cargo packages
       shell: >
         cargo install --list | grep -q {{ item }}
-        && echo -n HOLDED
+        && printf HOLDED
         || cargo install {{ item }}
       register: cargo_install_hold
       changed_when: cargo_install_hold.stdout != 'HOLDED'
@@ -46,7 +64,7 @@
     - name: Install Vagrant libvirt plugin
       shell: >
         vagrant plugin list | grep -q vagrant-libvirt
-        && echo -n HOLDED
+        && printf HOLDED
         || vagrant plugin install vagrant-libvirt
       register: vagrant_libvirt_hold
       changed_when: vagrant_libvirt_hold.stdout != 'HOLDED'
