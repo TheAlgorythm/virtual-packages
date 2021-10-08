@@ -15,12 +15,14 @@
     - import_tasks: tasks/get_packages.yml
   
     - name: Install Pacman packages
+      become: yes
       pacman:
         name: "{{ pacman_packages }}"
         state: present
       when: "'pacman' in package_managers"
 
     - name: Install Paru for AUR
+      become: yes
       shell: >
         paru -V > /dev/null
         && printf HOLDED
