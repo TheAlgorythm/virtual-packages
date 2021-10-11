@@ -63,6 +63,16 @@
       changed_when: oh_my_zsh_install_hold.stdout != 'HOLDED'
       when: "'oh-my-zsh' in package_managers"
 
+    - name: Install Oh My Zsh packages
+      shell: >
+        ls -a ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins | grep -q {{ item.name }}
+        && printf HOLDED
+        || git clone {{ item.git }} ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/{{ item.name}}
+      register: oh_my_zsh_package_install_hold
+      changed_when: oh_my_zsh_package_install_hold.stdout != 'HOLDED'
+      loop: "{{ oh_my_zsh_packages }}"
+      when: "'oh-my-zsh' in package_managers"
+
     - name: Install Cargo packages
       shell: >
         cargo install --list | grep -q {{ item }}

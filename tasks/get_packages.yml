@@ -13,4 +13,5 @@
     aur_packages: "{{ packages | select('package_divide', 'aur', package_managers) | map(attribute='aur') | list }}"
     brew_packages: "{{ packages | select('package_divide', 'brew', package_managers) | map(attribute='brew') | list }}"
     brew_cask_packages: "{{ packages | select('package_divide', 'brew-cask', package_managers) | map(attribute='brew-cask') | list }}"
+    oh_my_zsh_packages: "{{ packages | select('package_divide', 'oh-my-zsh', package_managers) | map(attribute='oh-my-zsh') | list }}"
     cargo_packages: "{{ packages | select('package_divide', 'cargo', package_managers) | map(attribute='cargo') | list }}"

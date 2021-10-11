@@ -43,6 +43,11 @@
         var: brew_cask_packages
       when: "'brew-cask' in package_managers"
 
+    - name: Oh My Zsh packages to install
+      debug:
+        var: oh_my_zsh_packages
+      when: "'oh-my-zsh' in package_managers"
+
     - name: Cargo packages to install
       debug:
         var: cargo_packages
